@@ -1,3 +1,5 @@
+#' Create Partial Ancestral Graph Based on Bootrstrap Analysis
+#'
 #' Plots a pag based on the bootstrap analysis. First all edges that are identified
 #' in the bootstrap samples significantly more often than the threshold are included.
 #' Afterwards all marks for the ends of the edges that are identified
@@ -5,7 +7,7 @@
 #' The remaining edge ends that do not have a mark are assignned a circle to
 #' illustrate the observed uncertainity in these marks.
 #'
-#' @param Arrowhead_results Dataframe holding the proportion of time each arrowhead has been included created by bootstrap_results(_, "Arrowheads")
+#' @param Arrowheads_results Dataframe holding the proportion of time each arrowhead has been included created by bootstrap_results(_, "Arrowheads")
 #' @param Tails_results Dataframe holding the proportion of time each tail has been included created by bootstrap_results(_, "Tails")
 #' @param Circles_results Dataframe holding the proportion of time each circle has been included created by bootstrap_results(_, "Circles")
 #' @param Edges_results Dataframe holding the proportion of time each edge has been included created by bootstrap_results(_, "Edges")
@@ -15,24 +17,19 @@
 #'
 #' @examples
 #'
-#' make_averaged_bootstrap_graph(
-#'   Arrowheads_results = Arrowheads_results,
-#'   Tails_results = Tails_results,
-#'   Circles_results = Circles_results,
-#'   Edges_results = Edges_results,
-#'   edge_threshold = .8,
-#'   mark_threshold = .8
-#' )
+#' # averaged_bootstrap_graph(
+#' #   Arrowheads_results = Arrowheads_results,
+#' #   Tails_results = Tails_results,
+#' #   Circles_results = Circles_results,
+#' #   Edges_results = Edges_results,
+#' #   edge_threshold = .8,
+#' #   mark_threshold = .8
+#' # )
+#'
+#' @export
 
-make_averaged_bootstrap_graph <- function(Arrowheads_results, Tails_results, Circles_results,
+averaged_bootstrap_graph <- function(Arrowheads_results, Tails_results, Circles_results,
                                           Edges_results, sig = FALSE, edge_threshold = 0, mark_threshold = 0) {
-  if (!require(dplyr, quietly = T, warn.conflicts = F)) {
-    stop("dplyr is not installed")
-  }
-
-  if (!require(reshape2, quietly = T, warn.conflicts = F)) {
-    stop("reshape2 is not installed")
-  }
 
   if (sig & edge_threshold > 0) {
     message("Since, both significance and edge_threshold have been chosen, the more
@@ -75,8 +72,8 @@ make_averaged_bootstrap_graph <- function(Arrowheads_results, Tails_results, Cir
   colnames(Tails_results) <- c("From", "Into", "Proportion_Tails", "LB_Tails")
   colnames(Circles_results) <- c("From", "Into", "Proportion_Circles", "LB_Circles")
 
-  overall_results <- full_join(Arrowheads_results, Tails_results, by = c("From", "Into")) %>%
-    full_join(Circles_results, by = c("From", "Into"))
+  overall_results <- dplyr::full_join(dplyr::full_join(Arrowheads_results, Tails_results, by = c("From", "Into")),
+    Circles_results, by = c("From", "Into"))
 
   if (sig) {
     overall_results$Mark <- mapply(
@@ -156,7 +153,7 @@ make_averaged_bootstrap_graph <- function(Arrowheads_results, Tails_results, Cir
 
   overall_results[, c(3)] <- sapply(overall_results[, c(3)], as.numeric)
 
-  overall_results <- dcast(overall_results, From ~ Into, value.var = "Mark")
+  overall_results <- reshape2::dcast(overall_results, From ~ Into, value.var = "Mark")
 
   overall_results <- overall_results[, !(names(overall_results) %in% "From")]
 

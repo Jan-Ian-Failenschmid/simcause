@@ -1,3 +1,5 @@
+#' Undirected Bootstrap Graph
+#'
 #' Plots undirected bootsrap graph in which the proportion of times an eges has been
 #' included corresponds to the saturation of the edge.
 #'
@@ -6,16 +8,11 @@
 #' @param threshold Value between 0 and 1. If sig is false only edges are included with a proportion significantly greater than the threshold.
 #'
 #' @examples
-#' undirected_bootstrap_graph(Edges_results, threshold = .8)
+#' # undirected_bootstrap_graph(Edges_results, threshold = .8)
+#'
+#' @export
 
 undirected_bootstrap_graph <- function(bootstrap_edges, sig = FALSE, threshold = 0) {
-  if (!require(qgraph, quietly = T, warn.conflicts = F)) {
-    stop("qgraph is not installed")
-  }
-
-  if (!require(reshape2, quietly = T, warn.conflicts = F)) {
-    stop("reshape2 is not installed")
-  }
 
   # Remove insignificant edges
   if (sig) {
@@ -40,7 +37,7 @@ undirected_bootstrap_graph <- function(bootstrap_edges, sig = FALSE, threshold =
 
   # A lot more work
   # Widen the data list to a matrix
-  graph_matrix <- dcast(bootstrap_edges, `Vertex 1` ~ `Vertex 2`, value.var = "Proportion")
+  graph_matrix <- reshape2::dcast(bootstrap_edges, `Vertex 1` ~ `Vertex 2`, value.var = "Proportion")
   # Change NA's to 0
   graph_matrix[is.na(graph_matrix)] <- 0
   # Remove Vertex 1 column
@@ -54,7 +51,7 @@ undirected_bootstrap_graph <- function(bootstrap_edges, sig = FALSE, threshold =
   # Add rownames
   row.names(graph_matrix) <- colnames(graph_matrix)
 
-  qgraph(graph_matrix,
+  qgraph::qgraph(graph_matrix,
          layout = "spring", theme = "gray",
          nodeNames = row.names(graph_matrix), minimum = 0, maximum = 1
   )

@@ -1,5 +1,7 @@
+#' Bootstrap Sampling for the Fast Causal Inference Algorithm
+#'
 #' Bootstrap analysis of FCI results for a given data set.
-#' Can be used to quantify the uncertainity that is present for any graph feature within the data.
+#' Can be used to quantify the uncertainty that is present for any graph feature within the data.
 #'
 #' @param data Data frame of the variables to be analysed.
 #' @param labels Character vector of variable names or node labels.
@@ -12,13 +14,15 @@
 #'
 #' @examples
 #'
-#' bootstrap_n <- 200
-#' sample_proportion <- 1
-#' threshold <- 1
-#' bootstrap_samples <- fci_bootstrap(
-#'   data = data, labels = colnames(data), amount = bootstrap_n,
-#'   sample_proportion = sample_proportion
-#' )
+#' # bootstrap_n <- 200
+#' # sample_proportion <- 1
+#' # threshold <- 1
+#' # bootstrap_samples <- fci_bootstrap(
+#' #   data = data, labels = colnames(data), amount = bootstrap_n,
+#' #   sample_proportion = sample_proportion
+#' # )
+#'
+#' @export
 
 fci_bootstrap <- function(data,
                           labels,
@@ -26,15 +30,6 @@ fci_bootstrap <- function(data,
                           sample_proportion = 1,
                           replace = TRUE,
                           alpha = 0.01) {
-
-  # Check loaded packages
-  if (!require(pcalg, quietly = T, warn.conflicts = F)) {
-    stop("pcalg is not installed")
-  }
-
-  if (!require(reshape2, quietly = T, warn.conflicts = F)) {
-    stop("reshape2 is not installed")
-  }
 
   # If sample_proportion is larger than 1, replace has to be TRUE
   if (sample_proportion > 1 & replace == FALSE) replace <- TRUE
@@ -67,14 +62,11 @@ fci_bootstrap <- function(data,
     n = sample_size
   )
 
-  # Define independence test
-  indepTest <- gaussCItest
-
   # Run FCI over the grid
   bootstrap_samples$Fit_FCI <- lapply(
     bootstrap_samples$suffStat,
-    fci,
-    indepTest = indepTest,
+    pcalg::fci,
+    indepTest = gaussCItest,
     alpha = alpha,
     labels = labels,
     selectionBias = FALSE
@@ -92,7 +84,7 @@ fci_bootstrap <- function(data,
   bootstrap_samples$melted <- lapply(
     bootstrap_samples$amat,
     function(amat) {
-      melted <- melt(amat)
+      melted <- reshape2::melt(amat)
       colnames(melted) <- c("From", "Into", "Mark")
       melted <- melted[melted$From != melted$Into, ]
       return(melted)

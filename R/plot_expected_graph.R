@@ -1,19 +1,20 @@
+#' Plot Graph from Amat Matrix
+#'
 #' Function to create a target or expected pag based on a pcalg pag amat style adjacency matrix.
 #' Wrapper for Rgraphviz
 #'
-#' @param acyclic_grap_amat Adjacency matrix of the graph that should be plotted, in the style of a pcalg pag amat matrix.
-#' @param lables Character vector of variable names or node labels.
+#' @param acyc_graph_amat Adjacency matrix of the graph that should be plotted, in the style of a pcalg pag amat matrix.
+#' @param labels Character vector of variable names or node labels.
+#'
+#' @export
 
 
 plot_expected_graph <- function(acyc_graph_amat, labels) {
-  if (!require(Rgraphviz, quietly = T, warn.conflicts = F)) {
-    stop("Rgraphviz is not installed")
-  }
   rownames(acyc_graph_amat) <- colnames(acyc_graph_amat) <- labels # Add lables for cosmetic reasons
-  g <- as(acyc_graph_amat, "graphNEL")
-  nn <- nodes(g)
-  p <- numNodes(g)
-  n.edges <- numEdges(g) / 2
+  g <- methods::as(acyc_graph_amat, "graphNEL")
+  nn <- graph::nodes(g)
+  p <- graph::numNodes(g)
+  n.edges <- graph::numEdges(g) / 2
   ahs <- ats <- rep("none", n.edges)
   nms <- character(n.edges)
   cmat <- array(c(
@@ -36,6 +37,6 @@ plot_expected_graph <- function(acyc_graph_amat, labels) {
     }
   }
   names(ahs) <- names(ats) <- nms
-  edgeRenderInfo(g) <- list(arrowhead = ahs, arrowtail = ats)
+  graph::edgeRenderInfo(g) <- list(arrowhead = ahs, arrowtail = ats)
   Rgraphviz::renderGraph(Rgraphviz::layoutGraph(g))
 }
