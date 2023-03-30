@@ -23,3 +23,5 @@ Imports:
     ggplot2, 
     purrr, 
     tidyr
+URL: https://github.com/Jan-Ian-Failenschmid/simcause
+BugReports: https://github.com/Jan-Ian-Failenschmid/simcause/issues
